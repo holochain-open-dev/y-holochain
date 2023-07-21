@@ -5,11 +5,11 @@
 ## Usage
 
 1. Setup the zomes in your DNA
-  1. hc scaffold zome yjs
-  1. run `cargo add -p yjs hc_zome_yjs_coordinator`
-  1. run `cargo add -p yjs_integrity hc_zome_yjs_integrity`
-  1. Replace the integrity zome's `lib.rs` (its path may be similar to dnas/my-dna/zomes/integrity/yjs/src/lib.rs) and replace its contents with: `extern crate hc_zome_yjs_integrity;`
-  1. Replace the coordinator zome's `lib.rs` (its path may be similar to dnas/my-dna/zomes/coordinator/yjs/src/lib.rs) and replace its contents with: `extern crate hc_zome_yjs_coordinator;`
+    1. hc scaffold zome yjs
+    1. run `cargo add -p yjs hc_zome_yjs_coordinator`
+    1. run `cargo add -p yjs_integrity hc_zome_yjs_integrity`
+    1. Replace the integrity zome's `lib.rs` (its path may be similar to dnas/my-dna/zomes/integrity/yjs/src/lib.rs) and replace its contents with: `extern crate hc_zome_yjs_integrity;`
+    1. Replace the coordinator zome's `lib.rs` (its path may be similar to dnas/my-dna/zomes/coordinator/yjs/src/lib.rs) and replace its contents with: `extern crate hc_zome_yjs_coordinator;`
 
 1. Setup the Yjs provider in your front-end
 
