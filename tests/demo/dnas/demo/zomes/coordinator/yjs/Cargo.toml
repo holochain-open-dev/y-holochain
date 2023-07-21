@@ -1,0 +1,15 @@
+[package]
+name = "yjs"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "yjs"
+
+[dependencies]
+hdk = { workspace = true }
+
+serde = { workspace = true }
+
+hc_zome_yjs_coordinator = { workspace = true }

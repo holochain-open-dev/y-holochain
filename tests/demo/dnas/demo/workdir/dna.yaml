@@ -1,0 +1,19 @@
+---
+manifest_version: "1"
+name: demo
+integrity:
+  network_seed: ~
+  properties: ~
+  origin_time: 1689738016576718
+  zomes:
+    - name: yjs_integrity
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/yjs_integrity.wasm"
+      dependencies: ~
+coordinator:
+  zomes:
+    - name: yjs
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/yjs.wasm"
+      dependencies:
+        - name: yjs_integrity

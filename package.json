@@ -1,0 +1,64 @@
+{
+  "name": "y-holochain",
+  "version": "0.0.3",
+  "description": "holochain provider for yjs",
+  "author": "Build Your Web App",
+  "license": "Apache 2.0",
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.4",
+    "@babel/preset-typescript": "^7.16.0",
+    "@chainsafe/libp2p-noise": "^4.1.1",
+    "@holochain/tryorama": "^0.15.0-rc.1",
+    "@types/jest": "^27.0.3",
+    "@types/lodash-es": "^4.17.8",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "babel-jest": "^27.4.2",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-config-standard-with-typescript": "^36.1.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^16.0.1",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-vue": "^9.15.1",
+    "jest": "^27.4.3",
+    "libp2p-gossipsub": "^0.11.4",
+    "libp2p-mplex": "^0.10.4",
+    "libp2p-websockets": "^0.16.2",
+    "multiaddr": "^10.0.1",
+    "typescript": "^5.1.6",
+    "yjs-types": "^0.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "build-watch": "tsc -w",
+    "preinstall": "npm run build",
+    "test": "npm run build && npm -w tests run test"
+  },
+  "workspaces": [
+    "tests"
+  ],
+  "dependencies": {
+    "@msgpack/msgpack": "^3.0.0-beta2",
+    "lodash-es": "^4.17.21",
+    "peer-id": ">=0.16.0",
+    "set-interval-async": "^3.0.3",
+    "y-protocols": "^1.0.x",
+    "yjs": "^13.6.7"
+  },
+  "module": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./locales/*": "./locales/*",
+    "./dist/*": "./dist/*"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module"
+}
