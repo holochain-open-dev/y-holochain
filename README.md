@@ -33,7 +33,7 @@ async setupYjsProvider() {
     ydoc,               // Yjs Y.Doc
     client,             // Holochain client
     "demo",             // RoleName of cell with 'yjs' zome
-    "yjs",              // ZomeName of 'yjs' zome
+    "yjs",              // ZomeName of 'yjs' coordinator zome
     documentActionHash  // ActionHash of the document
   );  
 
