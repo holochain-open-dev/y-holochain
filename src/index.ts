@@ -8,6 +8,7 @@ import {
   ZomeName,
   ActionHash,
 } from "@holochain/client";
+import { IAppAgentWebsocket } from "@holochain/tryorama";
 import { Statevector } from "./types";
 import { isEqual } from "lodash-es";
 import {
@@ -19,7 +20,7 @@ import { decode } from "@msgpack/msgpack";
 
 class HolochainProvider extends Observable<string> {
   ydoc: Y.Doc;
-  client: AppAgentWebsocket;
+  client: AppAgentWebsocket | IAppAgentWebsocket;
   roleName: RoleName;
   zomeName: ZomeName;
   documentActionHash: ActionHash;
@@ -29,7 +30,7 @@ class HolochainProvider extends Observable<string> {
 
   constructor(
     ydoc: Y.Doc,
-    client: AppAgentWebsocket,
+    client: AppAgentWebsocket | IAppAgentWebsocket,
     roleName: RoleName,
     zomeName: ZomeName,
     documentActionHash: ActionHash,
@@ -122,8 +123,10 @@ class HolochainProvider extends Observable<string> {
     while (this.publishQueue.length > 0) {
       const update = this.publishQueue.pop();
 
-      if ((this.client.appWebsocket.client.socket.readyState as number) !== 1)
+
+      if ((this.client instanceof AppAgentWebsocket) && (this.client.appWebsocket.client.socket.readyState as number) !== 1)
         return;
+
       await this.client.callZome({
         role_name: this.roleName,
         zome_name: this.zomeName,

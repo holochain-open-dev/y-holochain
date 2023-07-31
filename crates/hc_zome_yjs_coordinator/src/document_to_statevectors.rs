@@ -20,7 +20,8 @@ pub fn get_statevectors_for_document(document_hash: ActionHash) -> ExternResult<
     
     let get_input: Vec<GetInput> = links
         .into_iter()
-        .map(|link| GetInput::new(EntryHash::from(link.target).into(), GetOptions::default()))
+        .filter_map(|link| AnyDhtHash::try_from(link.target).ok())
+        .map(|hash| GetInput::new(hash, GetOptions::default()))
         .collect();
 
     // Get the records to filter out the deleted ones

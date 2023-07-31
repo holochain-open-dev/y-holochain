@@ -6,13 +6,13 @@ authors = [
 description = "Holochain provider for yjs"
 license = "Apache-2.0"
 keywords = ["holochain", "yjs", "collaboration", "crdt"]
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 name = "hc_zome_yjs_integrity"
-version = "0.0.1"
+version = "0.0.2"
 
 [dependencies]
 hdi = { workspace = true }

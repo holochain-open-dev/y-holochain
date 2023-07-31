@@ -6,7 +6,7 @@ pub fn validate_create_link_document_to_statevectors(
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
     // Check the entry type for the given action hash
-    let action_hash = ActionHash::from(base_address);
+    let action_hash = ActionHash::try_from(base_address).map_err(|e| wasm_error!(e))?;
     let record = must_get_valid_record(action_hash)?;
     let _document: crate::Document = record
         .entry()
@@ -18,7 +18,7 @@ pub fn validate_create_link_document_to_statevectors(
             ),
         )?;
     // Check the entry type for the given entry hash
-    let entry_hash = EntryHash::from(target_address);
+    let entry_hash = EntryHash::try_from(target_address).map_err(|e| wasm_error!(e))?;
     let entry = must_get_entry(entry_hash)?.content;
     let _statevector = crate::Statevector::try_from(entry)?;
     // TODO: add the appropriate validation rules
