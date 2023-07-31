@@ -6,8 +6,9 @@ pub fn get_all_documents(_: ()) -> ExternResult<Vec<Record>> {
     let links = get_links(path.path_entry_hash()?, LinkTypes::AllDocuments, None)?;
     let get_input: Vec<GetInput> = links
         .into_iter()
-        .map(|link| GetInput::new(
-            ActionHash::from(link.target).into(),
+        .filter_map(|link| AnyDhtHash::try_from(link.target).ok())
+        .map(|hash| GetInput::new(
+            hash,
             GetOptions::default(),
         ))
         .collect();

@@ -29,7 +29,7 @@ pub fn get_document(original_document_hash: ActionHash) -> ExternResult<Option<R
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
     let latest_document_hash = match latest_link {
-        Some(link) => ActionHash::from(link.target.clone()),
+        Some(link) => ActionHash::try_from(link.target.clone()).map_err(|e| wasm_error!(e))?,
         None => original_document_hash.clone(),
     };
     get(latest_document_hash, GetOptions::default())

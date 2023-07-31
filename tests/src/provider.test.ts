@@ -62,14 +62,14 @@ test("Provider syncs doc across 2 unsynced peers", async () => {
     // Setup YJS Provider
     const aliceProvider = new HolochainProvider(
       aliceDoc,
-      alice.conductor.appAgentWs(),
+      alice.appAgentWs,
       "demo",
       "yjs",
       documentAh,
     );
     const bobProvider = new HolochainProvider(
       bobDoc,
-      bob.conductor.appAgentWs(),
+      bob.appAgentWs,
       "demo",
       "yjs",
       documentAh,
