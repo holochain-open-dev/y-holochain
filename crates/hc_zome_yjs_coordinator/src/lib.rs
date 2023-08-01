@@ -1,7 +1,8 @@
 pub mod document_to_statevectors;
+pub use document_to_statevectors::CreateStatevectorForDocumentInput;
 pub mod all_documents;
-pub mod document_to_agents;
 pub mod document;
+pub mod document_to_agents;
 pub mod statevector;
 use hdk::prelude::*;
 
@@ -16,12 +17,11 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
     );
     create_cap_grant(cap_grant_entry)?;
 
-
     Ok(InitCallbackResult::Pass)
 }
 
 #[hdk_extern]
-fn recv_remote_signal(signal: SerializedBytes) -> ExternResult<()> {
-    emit_signal(&signal)?;
+fn recv_remote_signal(signal: CreateStatevectorForDocumentInput) -> ExternResult<()> {
+    emit_signal(signal)?;
     Ok(())
 }

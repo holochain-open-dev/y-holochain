@@ -55,6 +55,9 @@ class HolochainProvider extends Observable<string> {
     //   await this._publishQueued();
     // }, 50);
 
+    // Add agent to document, so they receive signal updates
+    await this._ensureAgentForDocument();
+
     // Read initial document state and publish to DHT
     this._publishInitialState();
 
@@ -77,6 +80,18 @@ class HolochainProvider extends Observable<string> {
         this.documentActionHash,
       )}`,
     );
+  }
+
+  private async _ensureAgentForDocument(): Promise<void> {
+    await this.client.callZome({
+      role_name: this.roleName,
+      zome_name: this.zomeName,
+      fn_name: 'ensure_agent_for_document',
+      payload: {
+        base_document_hash: this.documentActionHash,
+        target_agent: this.client.myPubKey
+      }
+    });
   }
 
   private async _publishInitialState(): Promise<void> {
@@ -154,10 +169,10 @@ class HolochainProvider extends Observable<string> {
   // }
 
   private async _onSignal(signal: AppSignal): Promise<void> {
-    const input = decode(signal.payload as any) as CreateStatevectorForDocumentInput;
-    
-    if(input.document_hash === this.documentActionHash) {
-      Y.applyUpdate(this.ydoc, input.statevector.data);
+    const payload = signal.payload as CreateStatevectorForDocumentInput;
+
+    if(isEqual(payload.document_hash, this.documentActionHash)) {
+      Y.applyUpdate(this.ydoc, payload.statevector.data);
     }
   }
 
