@@ -4,6 +4,7 @@ pub mod all_documents;
 pub mod document;
 pub mod document_to_agents;
 pub mod statevector;
+pub mod utils;
 use hdk::prelude::*;
 
 #[hdk_extern]

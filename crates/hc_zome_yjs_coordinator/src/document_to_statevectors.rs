@@ -1,5 +1,6 @@
 use crate::document_to_agents::*;
 use crate::statevector::*;
+use crate::utils::*;
 use hc_zome_yjs_integrity::*;
 use hdk::prelude::*;
 
@@ -10,7 +11,7 @@ pub struct AddStatevectorForDocumentInput {
 }
 #[hdk_extern]
 pub fn add_statevector_for_document(input: AddStatevectorForDocumentInput) -> ExternResult<()> {
-    create_link(
+    create_link_relaxed(
         input.base_document_hash,
         input.target_statevector_hash,
         LinkTypes::DocumentToStatevectors,
