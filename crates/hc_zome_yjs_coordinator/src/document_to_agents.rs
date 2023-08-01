@@ -9,8 +9,8 @@ pub struct AddAgentForDocumentInput {
 #[hdk_extern]
 pub fn add_agent_for_document(input: AddAgentForDocumentInput) -> ExternResult<()> {
     create_link(
-        input.base_document_hash.clone(),
-        input.target_agent.clone(),
+        input.base_document_hash,
+        input.target_agent,
         LinkTypes::DocumentToAgents,
         (),
     )?;

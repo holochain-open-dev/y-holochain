@@ -11,8 +11,8 @@ pub struct AddStatevectorForDocumentInput {
 #[hdk_extern]
 pub fn add_statevector_for_document(input: AddStatevectorForDocumentInput) -> ExternResult<()> {
     create_link(
-        input.base_document_hash.clone(),
-        input.target_statevector_hash.clone(),
+        input.base_document_hash,
+        input.target_statevector_hash,
         LinkTypes::DocumentToStatevectors,
         (),
     )?;
@@ -34,7 +34,7 @@ pub fn get_statevectors_for_document(document_hash: ActionHash) -> ExternResult<
     let records: Vec<Record> = HDK
         .with(|hdk| hdk.borrow().get(get_input))?
         .into_iter()
-        .filter_map(|r| r)
+        .flatten()
         .collect();
 
     Ok(records)
@@ -54,7 +54,7 @@ pub fn get_statevectors_for_document_delta(
         all_statevectors
             .iter()
             .filter_map(|r| r.entry().to_app_option::<Statevector>().ok())
-            .filter_map(|s| s),
+            .flatten(),
     );
 
     let seen_statevectors_btreeset = BTreeSet::from_iter(input.statevectors.iter().cloned());

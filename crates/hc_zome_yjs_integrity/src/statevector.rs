@@ -1,14 +1,8 @@
 use hdi::prelude::*;
 #[hdk_entry_helper]
-#[derive(Clone, PartialEq, Eq, PartialOrd)]
+#[derive(Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub struct Statevector {
     pub data: SerializedBytes,
-}
-
-impl Ord for Statevector {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.data.cmp(&other.data)
-    }
 }
 
 pub fn validate_create_statevector(
@@ -23,12 +17,16 @@ pub fn validate_update_statevector(
     _original_action: EntryCreationAction,
     _original_statevector: Statevector,
 ) -> ExternResult<ValidateCallbackResult> {
-    Ok(ValidateCallbackResult::Invalid(String::from("Statevectors cannot be updated")))
+    Ok(ValidateCallbackResult::Invalid(String::from(
+        "Statevectors cannot be updated",
+    )))
 }
 pub fn validate_delete_statevector(
     _action: Delete,
     _original_action: EntryCreationAction,
     _original_statevector: Statevector,
 ) -> ExternResult<ValidateCallbackResult> {
-    Ok(ValidateCallbackResult::Invalid(String::from("Statevectors cannot be deleted")))
+    Ok(ValidateCallbackResult::Invalid(String::from(
+        "Statevectors cannot be deleted",
+    )))
 }
