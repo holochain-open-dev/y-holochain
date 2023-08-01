@@ -32,6 +32,7 @@ export default defineComponent({
   },
   async mounted() {
     // We pass '' as url because it will dynamically be replaced in launcher environments
+    // @ts-ignore
     this.client = await AppAgentWebsocket.connect("", "demo");
 
     this.loading = false;

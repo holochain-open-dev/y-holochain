@@ -4,8 +4,10 @@ pub mod document;
 pub use document::*;
 pub mod statevector;
 pub use statevector::*;
+pub mod document_to_agents;
+pub use document_to_agents::*;
 use hdi::prelude::*;
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(tag = "type")]
 #[hdk_entry_defs]
 #[unit_enum(UnitEntryTypes)]
@@ -19,6 +21,7 @@ pub enum LinkTypes {
     DocumentUpdates,
     AllDocuments,
     DocumentToStatevectors,
+    DocumentToAgents,
 }
 #[hdk_extern]
 pub fn genesis_self_check(
@@ -167,6 +170,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::DocumentToAgents => {
+                    validate_create_link_document_to_agents(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         FlatOp::RegisterDeleteLink {
@@ -198,6 +209,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::DocumentToStatevectors => {
                     validate_delete_link_document_to_statevectors(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::DocumentToAgents => {
+                    validate_delete_link_document_to_agents(
                         action,
                         original_action,
                         base_address,
@@ -410,6 +430,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 tag,
                             )
                         }
+                        LinkTypes::DocumentToAgents => {
+                            validate_create_link_document_to_agents(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
                     }
                 }
                 OpRecord::DeleteLink { original_action_hash, base_address, action } => {
@@ -455,6 +483,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::DocumentToStatevectors => {
                             validate_delete_link_document_to_statevectors(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::DocumentToAgents => {
+                            validate_delete_link_document_to_agents(
                                 action,
                                 create_link.clone(),
                                 base_address,

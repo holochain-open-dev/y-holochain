@@ -7,9 +7,9 @@ import {
   RoleName,
   ZomeName,
   ActionHash,
+  AppSignal,
 } from "@holochain/client";
-import { IAppAgentWebsocket } from "@holochain/tryorama";
-import { Statevector } from "./types";
+import { CreateStatevectorForDocumentInput, Statevector } from "./types";
 import { isEqual } from "lodash-es";
 import {
   setIntervalAsync,
@@ -20,7 +20,7 @@ import { decode } from "@msgpack/msgpack";
 
 class HolochainProvider extends Observable<string> {
   ydoc: Y.Doc;
-  client: AppAgentWebsocket | IAppAgentWebsocket;
+  client: AppAgentWebsocket;
   roleName: RoleName;
   zomeName: ZomeName;
   documentActionHash: ActionHash;
@@ -30,7 +30,7 @@ class HolochainProvider extends Observable<string> {
 
   constructor(
     ydoc: Y.Doc,
-    client: AppAgentWebsocket | IAppAgentWebsocket,
+    client: AppAgentWebsocket,
     roleName: RoleName,
     zomeName: ZomeName,
     documentActionHash: ActionHash,
@@ -51,9 +51,9 @@ class HolochainProvider extends Observable<string> {
 
   private async _init(): Promise<void> {
     // Publish changes to DHT, avoiding 'chain head moved' errors
-    this.publishInterval = setIntervalAsync(async () => {
-      await this._publishQueued();
-    }, 50);
+    // this.publishInterval = setIntervalAsync(async () => {
+    //   await this._publishQueued();
+    // }, 50);
 
     // Read initial document state and publish to DHT
     this._publishInitialState();
@@ -65,9 +65,12 @@ class HolochainProvider extends Observable<string> {
     this.ydoc.on("update", this._onDocUpdate.bind(this));
 
     // Poll for DHT state changes and apply to document
-    this.pollingInterval = setIntervalAsync(async () => {
-      await this._fetchAndApplyUpdates();
-    }, 1000);
+    // this.pollingInterval = setIntervalAsync(async () => {
+    //   await this._fetchAndApplyUpdates();
+    // }, 1000);
+
+    // Listen for state change signals from holochain and apply to document
+    this.client.on('signal', this._onSignal.bind(this));
 
     console.log(
       `Initialized YJS connection for ${encodeHashToBase64(
@@ -84,12 +87,23 @@ class HolochainProvider extends Observable<string> {
     }
   }
 
-  private async _onDocUpdate(
+  private _onDocUpdate(
     update: Uint8Array,
     origin: this | any,
-  ): Promise<void> {
+  ): void {
     if (origin !== this) {
-      this.publishQueue.push(update);
+      console.log('on doc update');
+      this.client.callZome({
+        role_name: this.roleName,
+        zome_name: this.zomeName,
+        fn_name: "remote_signal_statevector_for_document",
+        payload: {
+          document_hash: this.documentActionHash,
+          statevector: {
+            data: update,
+          },
+        },
+      });
     }
   }
 
@@ -113,31 +127,37 @@ class HolochainProvider extends Observable<string> {
 
   private async _fetchAndApplyUpdates(): Promise<void> {
     const update = await this._fetchUpdates();
-
+  
     if (update) {
       Y.applyUpdate(this.ydoc, update);
     }
   }
 
-  private async _publishQueued(): Promise<void> {
-    while (this.publishQueue.length > 0) {
-      const update = this.publishQueue.pop();
+  // private async _publishQueued(): Promise<void> {
+  //   while (this.publishQueue.length > 0) {
+  //     const update = this.publishQueue.pop();
+  // 
+  //     if ((this.client.appWebsocket.client.socket.readyState as number) !== 1)
+  //       return;
+  //     await this.client.callZome({
+  //       role_name: this.roleName,
+  //       zome_name: this.zomeName,
+  //       fn_name: "remote_signal_statevector_for_document",
+  //       payload: {
+  //         document_hash: this.documentActionHash,
+  //         statevector: {
+  //           data: update,
+  //         },
+  //       },
+  //     });
+  //   }
+  // }
 
-
-      if ((this.client instanceof AppAgentWebsocket) && (this.client.appWebsocket.client.socket.readyState as number) !== 1)
-        return;
-
-      await this.client.callZome({
-        role_name: this.roleName,
-        zome_name: this.zomeName,
-        fn_name: "create_statevector_for_document",
-        payload: {
-          document_hash: this.documentActionHash,
-          statevector: {
-            data: update,
-          },
-        },
-      });
+  private async _onSignal(signal: AppSignal): Promise<void> {
+    const input = decode(signal.payload as any) as CreateStatevectorForDocumentInput;
+    
+    if(input.document_hash === this.documentActionHash) {
+      Y.applyUpdate(this.ydoc, input.statevector.data);
     }
   }
 

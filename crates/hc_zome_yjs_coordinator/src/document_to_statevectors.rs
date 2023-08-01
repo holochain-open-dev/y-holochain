@@ -1,5 +1,7 @@
 use hdk::prelude::*;
 use hc_zome_yjs_integrity::*;
+use crate::statevector::*;
+use crate::document_to_agents::*;
 
 #[derive(Serialize, Deserialize, SerializedBytes, Debug)]
 pub struct AddStatevectorForDocumentInput {
@@ -55,4 +57,47 @@ pub fn get_statevectors_for_document_delta(input: GetStatevectorsForDocumentDelt
     let new_statevectors = all_statevectors_btreeset.difference(&seen_statevectors_btreeset).cloned().collect();
 
     Ok(new_statevectors)
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct CreateStatevectorForDocumentInput {
+    pub document_hash: ActionHash,
+    pub statevector: Statevector,
+}
+#[hdk_extern]
+pub fn create_statevector_for_document(input: CreateStatevectorForDocumentInput) -> ExternResult<Record> {
+    let sv = create_statevector(input.statevector)?;
+    if let Some(entry_data) = sv.action().entry_data() {
+        add_statevector_for_document(AddStatevectorForDocumentInput {
+            base_document_hash: input.document_hash,
+            target_statevector_hash: entry_data.0.clone()
+        })?;
+    }
+    
+    Ok(sv)
+}
+
+#[hdk_extern]
+pub fn remote_signal_statevector_for_document(input: CreateStatevectorForDocumentInput) -> ExternResult<()> {
+    let agents = get_agents_for_document(input.document_hash)?;
+    remote_signal(input.statevector, agents)?;
+
+    Ok(())
+}
+
+#[hdk_extern]
+pub fn create_or_signal_statevector_for_document(input: CreateStatevectorForDocumentInput) -> ExternResult<()> {
+    let mut links = get_links(input.document_hash.clone(), LinkTypes::DocumentToStatevectors, None)?;
+    links.sort_by_key(|l| l.timestamp);
+    let maybe_newest_link = links.last();
+
+    // If > 5 mins since last commit, publish commit
+    if let Some(newest_link) = maybe_newest_link {
+        if newest_link.timestamp.0 > sys_time()?.0 + (1000 * 60 * 5) {
+            create_statevector_for_document(input.clone())?;
+        }
+    }
+    
+    // Always remote_signal_sv
+    remote_signal_statevector_for_document(input)
 }
