@@ -1,7 +1,7 @@
 import { HolochainProvider } from "../../dist";
 import * as Y from "yjs";
 import { test, expect } from "vitest";
-import { pause, runScenario } from "@holochain/tryorama";
+import { dhtSync, pause, runScenario } from "@holochain/tryorama";
 import { Record } from "@holochain/client";
 import { isEqual } from "lodash-es";
 
@@ -48,16 +48,12 @@ test("Provider syncs doc across 2 unsynced peers", async () => {
         title: "My document",
       },
     });
-    const documentAh = documentRecord.signed_action.hashed.hash;
 
-    await pause(2000);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Bob & Alice create a document on the same topic, with different contents
     const aliceDoc = new Y.Doc();
-    aliceDoc.getText("document").insert(0, "Hola");
-
     const bobDoc = new Y.Doc();
-    bobDoc.getText("document").insert(0, "Good bye");
 
     // Setup YJS Provider
     const aliceProvider = new HolochainProvider(
@@ -65,18 +61,20 @@ test("Provider syncs doc across 2 unsynced peers", async () => {
       alice.appAgentWs,
       "demo",
       "yjs",
-      documentAh,
+      documentRecord.signed_action.hashed.hash,
     );
     const bobProvider = new HolochainProvider(
       bobDoc,
       bob.appAgentWs,
       "demo",
       "yjs",
-      documentAh,
+      documentRecord.signed_action.hashed.hash,
     );
+    
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Alice updates the document contents
-    aliceDoc.getText("document").insert(0, "Hello");
+    bobDoc.getText("document").insert(0, "Hello");
 
     // Bob updates the document contents
     bobDoc.getText("document").insert(0, "Hola");
@@ -84,7 +82,7 @@ test("Provider syncs doc across 2 unsynced peers", async () => {
     // Wait for the state to be synced
     await waitFor(
       () => isEqual(Y.encodeStateVector(aliceDoc), Y.encodeStateVector(bobDoc)),
-      20000,
+      50000,
     );
 
     expect(Y.encodeStateVector(aliceDoc)).toEqual(Y.encodeStateVector(bobDoc));

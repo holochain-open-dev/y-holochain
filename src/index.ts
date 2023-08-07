@@ -46,12 +46,8 @@ class HolochainProvider extends Observable<string> {
     this.pollingInterval = undefined;
     this.publishInterval = undefined;
 
-    this._init();
-  }
-
-  private async _init(): Promise<void> {
     // Add agent to document, so they receive signal updates
-    await this._ensureAgentForDocument();
+    this._ensureAgentForDocument();
 
     // Read initial document state and publish to DHT
     this._publishInitialState();
