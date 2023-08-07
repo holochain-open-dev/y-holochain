@@ -8,7 +8,7 @@
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
-    "@holochain/client": "file:../../../holochain-client-js",
+    "@holochain/client": "^0.16.0",
     "@material/mwc-button": "^0.27.0",
     "@material/mwc-checkbox": "^0.27.0",
     "@material/mwc-circular-progress": "^0.27.0",

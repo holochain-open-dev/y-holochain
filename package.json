@@ -35,9 +35,8 @@
     "node": ">=16.0.0"
   },
   "scripts": {
-    "build": "npm run build:hc-client && tsc",
+    "build": "tsc",
     "build-watch": "tsc -w",
-    "build:hc-client": "cd holochain-client-js && npm run build",
     "preinstall": "npm run build",
     "test": "npm run build && npm -w tests run test",
     "start": "npm run build && npm -w tests run start"
@@ -46,7 +45,7 @@
     "tests"
   ],
   "dependencies": {
-    "@holochain/client": "file:holochain-client-js",
+    "@holochain/client": "^0.16.0",
     "@msgpack/msgpack": "^3.0.0-beta2",
     "lodash-es": "^4.17.21",
     "peer-id": ">=0.16.0",
