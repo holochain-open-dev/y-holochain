@@ -1,10 +1,10 @@
 <template>
-  <div v-if="!loading">
+  <div v-if="!loading" style="width: 100%">
     <div style="display: flex; flex-direction: row; margin-bottom: 16px">
       <span style="margin-right: 4px"><strong>Title: </strong></span>
       <span style="white-space: pre-line">{{ document?.title }} </span>
     </div>
-    <div id="editor-container"></div>
+    <div style="width: 100%" id="editor-container"></div>
   </div>
 
   <div
@@ -40,6 +40,7 @@ const emit = defineEmits(["document-deleted"]);
 const record = ref<Record>();
 const loading = ref(true);
 const errorSnackbar = ref();
+let ydoc: Y.Doc | undefined;
 
 const document = computed(() => {
   if (!record.value) return undefined;
@@ -55,7 +56,7 @@ onMounted(async () => {
 
   await fetchDocument();
 
-  const ydoc = new Y.Doc();
+  ydoc = new Y.Doc();
   const ydoctext = ydoc.getText("quill");
 
   var editor = new Quill("#editor-container", {
