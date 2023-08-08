@@ -11,11 +11,6 @@ import {
 } from "@holochain/client";
 import { CreateStatevectorForDocumentInput, Statevector } from "./types";
 import { isEqual } from "lodash-es";
-import {
-  setIntervalAsync,
-  clearIntervalAsync,
-  SetIntervalAsyncTimer,
-} from "set-interval-async";
 import { decode } from "@msgpack/msgpack";
 
 class HolochainProvider extends Observable<string> {
@@ -24,9 +19,6 @@ class HolochainProvider extends Observable<string> {
   roleName: RoleName;
   zomeName: ZomeName;
   documentActionHash: ActionHash;
-  publishQueue: Array<Uint8Array>;
-  pollingInterval: SetIntervalAsyncTimer<unknown[]> | undefined;
-  publishInterval: SetIntervalAsyncTimer<unknown[]> | undefined;
 
   constructor(
     ydoc: Y.Doc,
@@ -42,9 +34,6 @@ class HolochainProvider extends Observable<string> {
     this.roleName = roleName;
     this.zomeName = zomeName;
     this.documentActionHash = documentActionHash;
-    this.publishQueue = [];
-    this.pollingInterval = undefined;
-    this.publishInterval = undefined;
 
     // Add agent to document, so they receive signal updates
     this._ensureAgentForDocument();
@@ -161,12 +150,6 @@ class HolochainProvider extends Observable<string> {
   }
 
   destroy(): void {
-    if (this.pollingInterval) {
-      clearIntervalAsync(this.pollingInterval);
-    }
-    if (this.publishInterval) {
-      clearIntervalAsync(this.publishInterval);
-    }
     console.log(
       `Destroyed YJS connection for ${encodeHashToBase64(
         this.documentActionHash,
