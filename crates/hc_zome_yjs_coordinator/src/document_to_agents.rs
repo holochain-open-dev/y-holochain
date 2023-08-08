@@ -49,6 +49,17 @@ pub fn get_agents_for_document(document_hash: ActionHash) -> ExternResult<Vec<Ag
 }
 
 #[hdk_extern]
+pub fn get_other_agents_for_document(document_hash: ActionHash) -> ExternResult<Vec<AgentPubKey>> {
+    let mypubkey = agent_info()?.agent_initial_pubkey;
+    let agents = get_agents_for_document(document_hash)?
+        .into_iter()
+        .filter(|agent| agent != &mypubkey)
+        .collect();
+
+    Ok(agents)
+}
+
+#[hdk_extern]
 pub fn ensure_agent_for_document(input: AddAgentForDocumentInput) -> ExternResult<()> {
     let agents = get_agents_for_document(input.clone().base_document_hash)?;
 

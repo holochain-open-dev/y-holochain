@@ -2,7 +2,7 @@ import { HolochainProvider } from "../../dist";
 import * as Y from "yjs";
 import { test, expect } from "vitest";
 import { dhtSync, pause, runScenario } from "@holochain/tryorama";
-import { Record } from "@holochain/client";
+import { AppAgentWebsocket, Record } from "@holochain/client";
 import { isEqual } from "lodash-es";
 
 async function waitFor(
@@ -58,23 +58,24 @@ test("Provider syncs doc across 2 unsynced peers", async () => {
     // Setup YJS Provider
     const aliceProvider = new HolochainProvider(
       aliceDoc,
-      alice.appAgentWs,
+      alice.appAgentWs as AppAgentWebsocket,
       "demo",
       "yjs",
       documentRecord.signed_action.hashed.hash,
     );
     const bobProvider = new HolochainProvider(
       bobDoc,
-      bob.appAgentWs,
+      bob.appAgentWs as AppAgentWebsocket,
       "demo",
       "yjs",
       documentRecord.signed_action.hashed.hash,
     );
     
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+    await waitFor(() => bobProvider.isReady && aliceProvider.isReady, 10000);
 
     // Alice updates the document contents
-    bobDoc.getText("document").insert(0, "Hello");
+    aliceDoc.getText("document").insert(0, "Hello");
 
     // Bob updates the document contents
     bobDoc.getText("document").insert(0, "Hola");

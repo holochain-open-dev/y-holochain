@@ -1,5 +1,5 @@
 pub mod document_to_statevectors;
-pub use document_to_statevectors::CreateStatevectorForDocumentInput;
+pub use document_to_statevectors::CreateStatevectorForDocumentSignal;
 pub mod all_documents;
 pub mod document;
 pub mod document_to_agents;
@@ -22,7 +22,7 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
 }
 
 #[hdk_extern]
-fn recv_remote_signal(signal: CreateStatevectorForDocumentInput) -> ExternResult<()> {
+fn recv_remote_signal(signal: CreateStatevectorForDocumentSignal) -> ExternResult<()> {
     emit_signal(signal)?;
     Ok(())
 }

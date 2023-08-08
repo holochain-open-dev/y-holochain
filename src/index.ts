@@ -9,7 +9,7 @@ import {
   ActionHash,
   AppSignal,
 } from "@holochain/client";
-import { CreateStatevectorForDocumentInput, Statevector } from "./types";
+import { CreateStatevectorForDocumentSignal, Statevector } from "./types";
 import { isEqual } from "lodash-es";
 import { decode } from "@msgpack/msgpack";
 
@@ -19,6 +19,7 @@ class HolochainProvider extends Observable<string> {
   roleName: RoleName;
   zomeName: ZomeName;
   documentActionHash: ActionHash;
+  public isReady: boolean;
 
   constructor(
     ydoc: Y.Doc,
@@ -34,12 +35,13 @@ class HolochainProvider extends Observable<string> {
     this.roleName = roleName;
     this.zomeName = zomeName;
     this.documentActionHash = documentActionHash;
+    this.isReady = false;
 
+    this._init();
+  }
+  private async _init() {
     // Add agent to document, so they receive signal updates
-    this._ensureAgentForDocument();
-
-    // Read initial document state and publish to DHT
-    this._publishInitialState();
+    await this._ensureAgentForDocument();
 
     // Load initial DHT state and apply to document
     this._fetchAndApplyUpdates();
@@ -50,9 +52,13 @@ class HolochainProvider extends Observable<string> {
     // Listen for state change signals from holochain and apply to document
     this.client.on('signal', this._onSignal.bind(this));
 
+    this.isReady = true;
+
     console.log(
-      `Initialized YJS connection for ${encodeHashToBase64(
+      `Initialized YJS connection for document ${encodeHashToBase64(
         this.documentActionHash,
+      )} by agent ${encodeHashToBase64(
+        this.client.myPubKey
       )}`,
     );
   }
@@ -69,19 +75,11 @@ class HolochainProvider extends Observable<string> {
     });
   }
 
-  private async _publishInitialState(): Promise<void> {
-    const statevector = Y.encodeStateAsUpdate(this.ydoc);
-
-    if (!isEqual(statevector, new Uint8Array([0, 0]))) {
-      this._publishUpdate(statevector);
-    }
-  }
-
   private _onDocUpdate(
     update: Uint8Array,
-    origin: this | any,
+    provenance: Uint8Array | any,
   ): void {
-    if (origin !== this) {
+    if (!isEqual(provenance, this.client.myPubKey)) {
       this._signalUpdate(update);
       this._publishUpdate(update);
     }
@@ -109,7 +107,7 @@ class HolochainProvider extends Observable<string> {
     const update = await this._fetchUpdates();
   
     if (update) {
-      Y.applyUpdate(this.ydoc, update);
+      Y.applyUpdate(this.ydoc, update, this.client.myPubKey);
     }
   }
 
@@ -127,8 +125,8 @@ class HolochainProvider extends Observable<string> {
     });
   }
 
-  private _publishUpdate(data: Uint8Array): void {  
-    this.client.callZome({
+  private async _publishUpdate(data: Uint8Array): Promise<void> { 
+    await this.client.callZome({
       role_name: this.roleName,
       zome_name: this.zomeName,
       fn_name: "create_statevector_for_document",
@@ -142,10 +140,10 @@ class HolochainProvider extends Observable<string> {
   }
 
   private async _onSignal(signal: AppSignal): Promise<void> {
-    const payload = signal.payload as CreateStatevectorForDocumentInput;
+    const payload = signal.payload as CreateStatevectorForDocumentSignal;
 
     if(isEqual(payload.document_hash, this.documentActionHash)) {
-      Y.applyUpdate(this.ydoc, payload.statevector.data);
+      Y.applyUpdate(this.ydoc, payload.statevector.data, this.client.myPubKey);
     }
   }
 
