@@ -2,7 +2,7 @@
   "name": "tests",
   "private": true,
   "scripts": {
-    "build": "cd demo && npm install && npm run build:happ",
+    "build": "cd demo && npm i && npm run build:happ",
     "test": "npm run build && vitest run",
     "start": "npm run build && cd demo && npm run start"
   },
