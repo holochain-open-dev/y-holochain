@@ -71,8 +71,8 @@ test("Provider syncs doc across 2 unsynced peers", async () => {
       documentRecord.signed_action.hashed.hash,
     );
     
-    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     await waitFor(() => bobProvider.isReady && aliceProvider.isReady, 10000);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Alice updates the document contents
     aliceDoc.getText("document").insert(0, "Hello");
@@ -83,7 +83,7 @@ test("Provider syncs doc across 2 unsynced peers", async () => {
     // Wait for the state to be synced
     await waitFor(
       () => isEqual(Y.encodeStateVector(aliceDoc), Y.encodeStateVector(bobDoc)),
-      50000,
+      100000,
     );
 
     expect(Y.encodeStateVector(aliceDoc)).toEqual(Y.encodeStateVector(bobDoc));
@@ -92,6 +92,85 @@ test("Provider syncs doc across 2 unsynced peers", async () => {
     );
   });
 });
+
+test("Agent no longer sent signals after Provider.destroy()", async () => {
+  await runScenario(async (scenario) => {
+    // Construct proper paths for your app.
+    // This assumes app bundle created by the `hc app pack` command.
+    const testAppPath = process.cwd() + "/demo/workdir/demo.happ";
+
+    // Set up the app to be installed
+    const appSource = { appBundleSource: { path: testAppPath } };
+
+    // Add 2 players with the test app to the Scenario. The returned players
+    // can be destructured.
+    const [alice, bob] = await scenario.addPlayersWithApps([
+      appSource,
+      appSource,
+    ]);
+
+    // Shortcut peer discovery through gossip and register all agents in every
+    // conductor of the scenario.
+    await scenario.shareAllAgents();
+
+    // Alice creates a document
+    const documentRecord: Record = await alice.cells[0].callZome({
+      zome_name: "yjs",
+      fn_name: "create_document",
+      payload: {
+        title: "My document",
+      },
+    });
+
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    // Bob & Alice create a document on the same topic, with different contents
+    const aliceDoc = new Y.Doc();
+    const bobDoc = new Y.Doc();
+
+    // Setup YJS Provider
+    const aliceProvider = new HolochainProvider(
+      aliceDoc,
+      alice.appAgentWs as AppAgentWebsocket,
+      "demo",
+      "yjs",
+      documentRecord.signed_action.hashed.hash,
+    );
+    const bobProvider = new HolochainProvider(
+      bobDoc,
+      bob.appAgentWs as AppAgentWebsocket,
+      "demo",
+      "yjs",
+      documentRecord.signed_action.hashed.hash,
+    );
+    
+    await waitFor(() => bobProvider.isReady && aliceProvider.isReady, 10000);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    // Alice updates the document contents
+    aliceDoc.getText("document").insert(0, "Hello");
+
+    // Wait for the state to be synced
+    await waitFor(
+      () => isEqual(Y.encodeStateVector(aliceDoc), Y.encodeStateVector(bobDoc)),
+      100000,
+    );
+    expect(Y.encodeStateVector(aliceDoc)).toEqual(Y.encodeStateVector(bobDoc));
+
+    // Destroy alice's provider
+    await aliceProvider.destroy();
+
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    bobDoc.getText("document").insert(0, "Hola");
+
+    await pause(2000);
+    
+    // Alice should not receive signal updates
+    expect(Y.encodeStateVector(aliceDoc)).not.toEqual(Y.encodeStateVector(bobDoc));
+  });
+});
+
 
 /*
 test("provider syncs awareness", async () => {

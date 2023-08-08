@@ -59,7 +59,7 @@ class HolochainProvider extends Observable<string> {
         this.documentActionHash,
       )} by agent ${encodeHashToBase64(
         this.client.myPubKey
-      )}`,
+      )}`
     );
   }
 
@@ -147,11 +147,24 @@ class HolochainProvider extends Observable<string> {
     }
   }
 
-  destroy(): void {
+  async destroy(): Promise<void> {
+    await this.client.callZome({
+      role_name: this.roleName,
+      zome_name: this.zomeName,
+      fn_name: 'remove_agent_for_document',
+      payload: {
+        base_document_hash: this.documentActionHash,
+        target_agent: this.client.myPubKey
+      }
+    });
+    this.ydoc.destroy();
+
     console.log(
-      `Destroyed YJS connection for ${encodeHashToBase64(
+      `Destroyed YJS connection for document ${encodeHashToBase64(
         this.documentActionHash,
-      )}`,
+      )} by agent ${encodeHashToBase64(
+        this.client.myPubKey
+      )}`
     );
   }
 }

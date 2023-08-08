@@ -17,7 +17,9 @@ Yjs already offers bindings for many popular rich text editors including [Quill]
 
 ```js
 import { HolochainProvider } from 'y-holochain'
+import { onMounted, onUnmounted } from 'vue';
 
+let provider: HolochainProvider | undefined;
 async setupYjsProvider() {
   // Create a document where this Yjs data will be stored
   const record = await client.callZome({
@@ -31,7 +33,7 @@ async setupYjsProvider() {
 
   // Setup Yjs Doc & HolochainProvider
   const ydoc = new Y.Doc();
-  const provider = new HolochainProvider(
+  provider = new HolochainProvider(
     ydoc,               // Yjs Y.Doc
     client,             // Holochain client
     "demo",             // RoleName of cell with 'yjs' zome
@@ -43,6 +45,17 @@ async setupYjsProvider() {
   const quill = new Quill("#my-editor-container");
   new QuillBinding(ydoc.getText('quill'), editor);
 }
+
+onMounted(() => {
+  setupYjsProvider();
+});
+
+// Call destroy() when provider no longer in use
+onUnmounted(() => {
+  if(provider) {
+    provider.destroy()
+  }
+});
 ```
 
 YJS has bindings for many popular text & rich-text editors. See https://docs.yjs.dev/ecosystem/editor-bindings for details.
