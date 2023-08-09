@@ -1,20 +1,46 @@
 <template>
-  <div v-if="!loading">
+  <div v-if="!loading" 
+    style="
+      cursor: pointer;
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 16px;
+      padding: 5px;
+    ">
+    {{ document?.title }} 
     <RouterLink
-      style="
-        cursor: pointer;
-        display: flex;
-        flex-direction: row;
-        margin-bottom: 16px;
-        padding: 5px;
-        border: solid black 1px;
-      "
+      tag="button"
       :to="{
-        name: 'document',
+        name: 'document/quill',
         params: { documentHashB64: encodeHashToBase64(documentHash) },
       }"
+      custom
+      v-slot="{ navigate }"
     >
-      {{ document?.title }}
+      <button
+        style="margin-left: 0.5rem;"
+        @click="navigate"
+        role="link"
+      >
+        Quill
+      </button>
+    </RouterLink>
+    <RouterLink
+      tag="button"
+      :to="{
+        name: 'document/tiptap',
+        params: { documentHashB64: encodeHashToBase64(documentHash) },
+      }"
+      custom
+      v-slot="{ navigate }"
+    >
+      <button
+        style="margin-left: 0.5rem;"
+        @click="navigate"
+        role="link"
+      >
+        TipTap
+      </button>
     </RouterLink>
   </div>
 

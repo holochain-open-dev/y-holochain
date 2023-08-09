@@ -1,4 +1,7 @@
 <template>
+  <div style="margin-bottom: 2rem;">
+    <button @click="router.back()">Back</button>
+  </div>
   <div v-if="!loading" style="width: 100%">
     <div style="display: flex; flex-direction: row; margin-bottom: 16px">
       <span style="margin-right: 4px"><strong>Title: </strong></span>
@@ -33,12 +36,14 @@ import { QuillBinding } from "y-quill";
 import Quill from "quill";
 import { decodeHashFromBase64 } from "@holochain/client";
 import AgentsForDocument from "./AgentsForDocument.vue";
+import { useRouter} from "vue-router";
 
 const client = (inject("client") as ComputedRef<AppAgentWebsocket>).value;
 const props = defineProps<{
   documentHashB64: string;
 }>();
 const emit = defineEmits(["document-deleted"]);
+const router = useRouter();
 
 const record = ref<Record>();
 const loading = ref(true);
