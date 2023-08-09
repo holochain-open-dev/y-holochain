@@ -38,16 +38,17 @@
     "build": "tsc",
     "build-watch": "tsc -w",
     "preinstall": "npm run build",
-    "test": "npm run build && npm -w tests run test"
+    "test": "npm run build && npm -w tests run test",
+    "start": "npm run build && npm -w tests run start"
   },
   "workspaces": [
     "tests"
   ],
   "dependencies": {
+    "@holochain/client": "^0.16.0",
     "@msgpack/msgpack": "^3.0.0-beta2",
     "lodash-es": "^4.17.21",
     "peer-id": ">=0.16.0",
-    "set-interval-async": "^3.0.3",
     "y-protocols": "^1.0.x",
     "yjs": "^13.6.7"
   },

@@ -12,11 +12,9 @@ pub fn validate_create_link_document_to_statevectors(
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Linked action must reference an entry"
+        ))))?;
     // Check the entry type for the given entry hash
     let entry_hash = EntryHash::try_from(target_address).map_err(|e| wasm_error!(e))?;
     let entry = must_get_entry(entry_hash)?.content;
@@ -31,9 +29,7 @@ pub fn validate_delete_link_document_to_statevectors(
     _target: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    Ok(
-        ValidateCallbackResult::Invalid(
-            String::from("DocumentToStatevectors links cannot be deleted"),
-        ),
-    )
+    Ok(ValidateCallbackResult::Invalid(String::from(
+        "DocumentToStatevectors links cannot be deleted",
+    )))
 }

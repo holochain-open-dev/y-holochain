@@ -1,10 +1,12 @@
 <template>
-  <div v-if="!loading">
+  <div v-if="!loading" style="width: 100%">
     <div style="display: flex; flex-direction: row; margin-bottom: 16px">
       <span style="margin-right: 4px"><strong>Title: </strong></span>
       <span style="white-space: pre-line">{{ document?.title }} </span>
     </div>
-    <div id="editor-container"></div>
+    <div style="width: 100%" id="editor-container"></div>
+
+    <AgentsForDocument :document-hash="decodeHashFromBase64($props.documentHashB64)" />
   </div>
 
   <div
@@ -18,7 +20,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, ComputedRef, ref, computed, onMounted } from "vue";
+import { inject, ComputedRef, ref, computed, onMounted, onUnmounted, onBeforeUnmount } from "vue";
 import { decode } from "@msgpack/msgpack";
 import { AppAgentWebsocket, Record } from "@holochain/client";
 import { Document } from "./types";
@@ -30,6 +32,7 @@ import * as Y from "yjs";
 import { QuillBinding } from "y-quill";
 import Quill from "quill";
 import { decodeHashFromBase64 } from "@holochain/client";
+import AgentsForDocument from "./AgentsForDocument.vue";
 
 const client = (inject("client") as ComputedRef<AppAgentWebsocket>).value;
 const props = defineProps<{
@@ -40,7 +43,8 @@ const emit = defineEmits(["document-deleted"]);
 const record = ref<Record>();
 const loading = ref(true);
 const errorSnackbar = ref();
-
+let ydoc: Y.Doc | undefined;
+let provider: HolochainProvider | undefined;
 const document = computed(() => {
   if (!record.value) return undefined;
   return decode((record.value.entry as any).Present.entry) as Document;
@@ -55,7 +59,7 @@ onMounted(async () => {
 
   await fetchDocument();
 
-  const ydoc = new Y.Doc();
+  ydoc = new Y.Doc();
   const ydoctext = ydoc.getText("quill");
 
   var editor = new Quill("#editor-container", {
@@ -73,7 +77,7 @@ onMounted(async () => {
   // Optionally specify an Awareness instance, if supported by the Provider
   new QuillBinding(ydoctext, editor);
 
-  new HolochainProvider(
+  provider = new HolochainProvider(
     ydoc,
     client,
     "demo",
@@ -81,6 +85,12 @@ onMounted(async () => {
     decodeHashFromBase64(props.documentHashB64),
   );
 });
+
+onUnmounted(() => {
+  if(provider) {
+    provider.destroy();
+  }
+})
 
 const fetchDocument = async () => {
   loading.value = true;
