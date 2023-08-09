@@ -798,7 +798,7 @@ checksum = "2c6201b9ff9fd90a5a3bac2e56a830d0caa509576f0e503818ee82c181b3437a"
 
 [[package]]
 name = "hc_zome_yjs_coordinator"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "hc_zome_yjs_integrity",
  "hdk",

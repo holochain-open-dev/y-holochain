@@ -1,6 +1,6 @@
 {
   "name": "y-holochain",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "holochain provider for yjs",
   "author": "Build Your Web App",
   "license": "Apache 2.0",
