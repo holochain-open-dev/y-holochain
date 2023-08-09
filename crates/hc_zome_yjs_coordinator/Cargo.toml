@@ -19,4 +19,4 @@ hdk = { workspace = true }
 
 serde = { workspace = true }
 
-hc_zome_yjs_integrity = { path = "../hc_zome_yjs_integrity", version = "0.0.2" } 
+hc_zome_yjs_integrity = { path = "../hc_zome_yjs_integrity", version = "0.0.3" } 

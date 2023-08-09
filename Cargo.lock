@@ -807,7 +807,7 @@ dependencies = [
 
 [[package]]
 name = "hc_zome_yjs_integrity"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "hdi",
  "serde",
