@@ -2,7 +2,7 @@
 
 [Holochain](https://holochain.org/) provider for [Yjs](https://github.com/yjs/yjs). Easily build peer-to-peer real-time collaboration software using Holochain.
 
-Yjs already offers bindings for many popular rich text editors including [Quill](https://quilljs.com/) and [ProseMirror](https://prosemirror.net/).
+Yjs already offers bindings for many popular rich text editors including [Quill](https://quilljs.com/), [ProseMirror](https://prosemirror.net/) and [TipTap](https://tiptap.dev/examples/default).
 
 ## Usage
 
