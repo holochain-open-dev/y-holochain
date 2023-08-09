@@ -87,7 +87,6 @@ pub fn create_statevector_for_document(
     Ok(sv)
 }
 
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CreateStatevectorForDocumentSignal {
     pub provenance: AgentPubKey,
@@ -100,11 +99,14 @@ pub fn remote_signal_statevector_for_document(
 ) -> ExternResult<()> {
     let mypubkey = agent_info()?.agent_initial_pubkey;
     let agents = get_other_agents_for_document(input.clone().document_hash)?;
-    remote_signal(CreateStatevectorForDocumentSignal {
-        provenance: mypubkey,
-        document_hash: input.document_hash, 
-        statevector: input.statevector
-    }, agents)?;
+    remote_signal(
+        CreateStatevectorForDocumentSignal {
+            provenance: mypubkey,
+            document_hash: input.document_hash,
+            statevector: input.statevector,
+        },
+        agents,
+    )?;
 
     Ok(())
 }
